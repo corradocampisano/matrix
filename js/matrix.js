@@ -222,6 +222,8 @@ var ctx = canvas.getContext('2d');
 
 canvas.width = window.innerWidth;
 canvas.style.width = window.innerWidth+"px";
+//canvas.height = 350;
+//canvas.style.height = 350+"px";
 canvas.height = 350;
 canvas.style.height = 350+"px";
 
