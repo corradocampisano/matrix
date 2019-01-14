@@ -1,3 +1,10 @@
+
+(notitleyet)
+
+tender to "matrices as new numbers to do rotations, vectors to do translations"
+
+forked from:
+
 A mini Explorable Explanation for 2D Matrices.
 ===
 
