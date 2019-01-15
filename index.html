@@ -15,10 +15,17 @@
 	<div id="graphics">
 		<canvas id="bullets"></canvas>
 	</div>
+
 	<div id="math">
 		<div id="mtx_transform" class="matrix unselectable" style="width:180px">
-			<input value="1.0"/><input value="0.0"/><input value="0.0"/>
-			<input value="0.0"/><input value="1.0"/><input value="0.0"/>
+
+			<input value="1.0"/>
+			<input value="0.0"/>
+			<input value="0.0"/>
+
+			<input value="0.0"/>
+			<input value="1.0"/>
+			<input value="0.0"/>
 			
 			<div plain style="position: absolute; top: 120px;">0</div>
 			<div plain style="position: absolute; top: 120px; left:70px">0</div>
@@ -29,27 +36,25 @@
 			<br>
 			<span>(adjust the numbers!)</span>
 			</div>
-
 		</div>
+
 		<div id="mtx_input"  class="matrix unselectable" style="width:60px">
 
 			<div plain style="position: absolute; top: 0px;">x</div>
 			<div plain style="position: absolute; top: 60px;">y</div>
 			<div plain style="position: absolute; top: 120px;">1</div>
 
-			<!--div plain>x</div>
-			<div plain>y</div>
-			<div plain>1</div-->
-
 			<div class="label">
 			a vector
 			<br>
 			<span>(hover over the dots)</span>
 			</div>
-
 		</div>
+
 		<div class="equals"></div>
+
 		<div id="mtx_expanded"  class="matrix unselectable" expanded>
+
 			<div><span class="left">1</span>*<span class="right">1</span></div>
 			<div plus><span class="left">1</span>*<span class="right">1</span></div>
 			<div plus><span class="left">1</span>*<span class="right">1</span></div>
@@ -69,7 +74,9 @@
 			</div>
 
 		</div>
+
 		<div class="equals"></div>
+
 		<div id="mtx_output"  class="matrix" style="width:60px">
 			<div>x'</div>
 			<div>y'</div>
