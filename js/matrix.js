@@ -1,280 +1,105 @@
-function $(selector){
-	return document.querySelectorAll(selector);
-}
 
-var transform = {};
-var mtx_expanded_left = $("#mtx_expanded span.left");
-function updateMatrixLeft(){
-
-	for(var i=0;i<6;i++){
-		var m = mtx_expanded_left[i];
-		var t = mtx_transforms[i];
-		m.innerHTML = t.value;
-	}
-
-	transform.a = parseFloat(mtx_transforms[0].value) || 0;
-	transform.b = parseFloat(mtx_transforms[1].value) || 0;
-	transform.tx = parseFloat(mtx_transforms[2].value) || 0;
-	transform.c = parseFloat(mtx_transforms[3].value) || 0;
-	transform.d = parseFloat(mtx_transforms[4].value) || 0;
-	transform.ty = parseFloat(mtx_transforms[5].value) || 0;
-
-	draw();
-
-}
-
-// Mouse
-var Mouse = {
-	x: 0,
-	y: 0
-};
-
-// Make inputs scrubbable
-var scrubInput = null;
-var scrubPosition = {x:0, y:0};
-var scrubStartValue = 0;
-function makeScrubbable(input){
-	input.onmousedown = function(e){
-		scrubInput = e.target;
-		scrubPosition.x = e.clientX;
-		scrubPosition.y = e.clientY;
-		scrubStartValue = parseFloat(input.value);
-	}
-	input.onclick = function(e){
-		e.target.select();
-	}
-}
-window.onmousemove = function(e){
-	// Mouse
-	Mouse.x = e.clientX;
-	Mouse.y = e.clientY;
-
-	// If browser allows it, try to find x/y relative to canvas rather than page
-	if(e.offsetX != undefined){
-		Mouse.x = e.offsetX;
-		Mouse.y = e.offsetY;
-	}
-	else if(e.layerX != undefined && e.originalTarget != undefined){
-		Mouse.x = e.layerX-e.originalTarget.offsetLeft;
-		Mouse.y = e.layerY-e.originalTarget.offsetTop;
-	}
-
-	// Scrubbing
-	if(!scrubInput) return;
-	scrubInput.blur();
-	var deltaX = e.clientX - scrubPosition.x;
-	deltaX = Math.round(deltaX/10)*0.1; // 0.1 for every 10px
-	var val = scrubStartValue + deltaX;
-	scrubInput.value = (Math.round(val*10)/10).toFixed(1);
-	updateMatrixLeft();
-
-}
-window.onmouseup = function(){
-	scrubInput = null;
-}
-
-var mtx_transforms = $("#mtx_transform input");
-for(var i=0;i<mtx_transforms.length;i++){
-	var input = mtx_transforms[i];
-	input.onchange = updateMatrixLeft;
-	makeScrubbable(input);
-}
-
-var mtx_inputs = $("#mtx_input div");
-var mtx_outputs = $("#mtx_output div");
-var mtx_expanded_right = $("#mtx_expanded span.right");
-var mtx_expanded = $("#mtx_expanded")[0];
-function updateMatrixRight(){
-
-	for(var i=0;i<9;i++){
-		var m = mtx_expanded_right[i];
-		var input = mtx_inputs[i%3];
-		m.innerHTML = input.innerHTML;
-	}
-
-	if(mtx_inputs[0].innerHTML==="x"){
-		mtx_outputs[0].innerHTML = "x'";
-		mtx_outputs[1].innerHTML = "y'";
-
-		// DOM
-		mtx_inputs[0].style.border = "";
-	    mtx_inputs[0].style.width = "";
-	    mtx_inputs[0].style.height = "";
-	    mtx_inputs[0].style.lineHeight = "";
-	    mtx_inputs[1].style.border = "";
-	    mtx_inputs[1].style.width = "";
-	    mtx_inputs[1].style.height = "";
-	    mtx_inputs[1].style.lineHeight = "";
-
-		mtx_outputs[0].style.background = "";
-		mtx_outputs[1].style.background = "";
-		mtx_outputs[0].style.color = "";
-		mtx_outputs[1].style.color = "";
-
-		mtx_expanded.setAttribute("highlight","no");
-
-	}else{
-		var result = calculate(parseFloat(mtx_inputs[0].innerHTML),parseFloat(mtx_inputs[1].innerHTML));
-		mtx_outputs[0].innerHTML = result.x.toFixed(1);
-		mtx_outputs[1].innerHTML = result.y.toFixed(1);
-
-		// DOM
-		mtx_inputs[0].style.border = "5px solid #DD3838";
-	    mtx_inputs[0].style.width = "40px";
-	    mtx_inputs[0].style.height = "40px";
-	    mtx_inputs[0].style.lineHeight = "40px";
-	    mtx_inputs[1].style.border = "5px solid #DD3838";
-	    mtx_inputs[1].style.width = "40px";
-	    mtx_inputs[1].style.height = "40px";
-	    mtx_inputs[1].style.lineHeight = "40px";
-
-		mtx_outputs[0].style.background = "#DD3838";
-		mtx_outputs[1].style.background = "#DD3838";
-		mtx_outputs[0].style.color = "#FFF";
-		mtx_outputs[1].style.color = "#FFF";
-
-		mtx_expanded.setAttribute("highlight","yes");
-
-	}
-
-}
-
-function calculate(x,y){
-
-	x = x || 0;
-	y = y || 0;
-
-	var a = transform.a;
-	var b = transform.b;
-	var tx = transform.tx;
-	var c = transform.c;
-	var d = transform.d;
-	var ty = transform.ty;
-
-	var x2 = a*x + b*y + tx;
-	var y2 = c*x + d*y + ty;
-
-	return {x:x2, y:y2};
-}
-
-// Red Hover
-function multiplicationHover(multDOM,transDOM,inputDOM){
-	multDOM.onmouseover = function(){
-
-		multDOM.style.background = "#DD3838";
-		multDOM.style.color = "#FFF";
-
-		if(transDOM.tagName=="INPUT"){
-			transDOM.style.borderColor = "#DD3838";
-			transDOM.style.borderWidth = "5px";
-		}else{
-			transDOM.style.border = "5px solid #DD3838"
-		    transDOM.style.width = "40px";
-		    transDOM.style.height = "40px";
-		    transDOM.style.lineHeight = "40px";
-		}
-
-		inputDOM.style.border = "5px solid #DD3838";
-	    inputDOM.style.width = "40px";
-	    inputDOM.style.height = "40px";
-	    inputDOM.style.lineHeight = "40px";
-
-	};
-	multDOM.onmouseout = function(){
-		
-		multDOM.style.background = "";
-		multDOM.style.color = "";
-
-		if(transDOM.tagName=="INPUT"){
-			transDOM.style.borderColor = "";
-			transDOM.style.borderWidth = "";
-		}else{
-			transDOM.style.border = "";
-		    transDOM.style.width = "";
-		    transDOM.style.height = "";
-		    transDOM.style.lineHeight = "";
-		}
-
-		inputDOM.style.border = "";
-	    inputDOM.style.width = "";
-	    inputDOM.style.height = "";
-	    inputDOM.style.lineHeight = "";
-
-	};
-}
-multiplicationHover($("#mtx_expanded > div:nth-child(1)")[0], $("#mtx_transform > input:nth-child(1)")[0], $("#mtx_input > div:nth-child(1)")[0]);
-multiplicationHover($("#mtx_expanded > div:nth-child(2)")[0], $("#mtx_transform > input:nth-child(2)")[0], $("#mtx_input > div:nth-child(2)")[0]);
-multiplicationHover($("#mtx_expanded > div:nth-child(3)")[0], $("#mtx_transform > input:nth-child(3)")[0], $("#mtx_input > div:nth-child(3)")[0]);
-
-multiplicationHover($("#mtx_expanded > div:nth-child(4)")[0], $("#mtx_transform > input:nth-child(4)")[0], $("#mtx_input > div:nth-child(1)")[0]);
-multiplicationHover($("#mtx_expanded > div:nth-child(5)")[0], $("#mtx_transform > input:nth-child(5)")[0], $("#mtx_input > div:nth-child(2)")[0]);
-multiplicationHover($("#mtx_expanded > div:nth-child(6)")[0], $("#mtx_transform > input:nth-child(6)")[0], $("#mtx_input > div:nth-child(3)")[0]);
-
-multiplicationHover($("#mtx_expanded > div:nth-child(7)")[0], $("#mtx_transform > div:nth-child(7)")[0], $("#mtx_input > div:nth-child(1)")[0]);
-multiplicationHover($("#mtx_expanded > div:nth-child(8)")[0], $("#mtx_transform > div:nth-child(8)")[0], $("#mtx_input > div:nth-child(2)")[0]);
-multiplicationHover($("#mtx_expanded > div:nth-child(9)")[0], $("#mtx_transform > div:nth-child(9)")[0], $("#mtx_input > div:nth-child(3)")[0]);
-
-
-///////////////////////////////
 
 var canvas = document.querySelector("canvas#bullets");
 var ctx = canvas.getContext('2d');
 
 canvas.width = window.innerWidth;
 canvas.style.width = window.innerWidth+"px";
-//canvas.height = 350;
-//canvas.style.height = 350+"px";
-canvas.height = 350;
-canvas.style.height = 350+"px";
+canvas.height = 600;
+canvas.style.height = 600+"px";
 
-var originalBullets = [
 
-	{x:-1,y:-1},
-	{x:-1,y:-0.75},
-	{x:-1,y:-0.50},
-	{x:-1,y:-0.25},
-	{x:-1,y:0},
-	{x:-1,y:0.25},
-	{x:-1,y:0.50},
-	{x:-1,y:0.75},
-	{x:-1,y:1},
-	{x:-0.83,y:0.83},
-	{x:-0.66,y:0.66},
-	{x:-0.50,y:0.50},
-	{x:-0.33,y:0.33},
-	{x:-0.16,y:0.16},
 
-	{x:0,y:0},
+var matrix = [[1, 0],[0, 1]];
+var vector = [0,0];
 
-	{x:1,y:-1},
-	{x:1,y:-0.75},
-	{x:1,y:-0.50},
-	{x:1,y:-0.25},
-	{x:1,y:0},
-	{x:1,y:0.25},
-	{x:1,y:0.50},
-	{x:1,y:0.75},
-	{x:1,y:1},
-	{x:0.83,y:0.83},
-	{x:0.66,y:0.66},
-	{x:0.50,y:0.50},
-	{x:0.33,y:0.33},
-	{x:0.16,y:0.16}
+var defaultColor = '#000';
+var startingGradientColor = '#FF0000';
+var stoppingGradientColor = '#0000FF';
+var bulletIsHoveredColor = '#dd3838';
 
-];
+
+function getGradientColor(start_color, end_color, percent) {
+	// strip the leading # if it's there
+	start_color = start_color.replace(/^\s*#|\s*$/g, '');
+	end_color = end_color.replace(/^\s*#|\s*$/g, '');
+
+	// convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
+	if(start_color.length == 3){
+		start_color = start_color.replace(/(.)/g, '$1$1');
+	}
+
+	if(end_color.length == 3){
+		end_color = end_color.replace(/(.)/g, '$1$1');
+	}
+
+	// get colors
+	var start_red = parseInt(start_color.substr(0, 2), 16),
+	start_green = parseInt(start_color.substr(2, 2), 16),
+	start_blue = parseInt(start_color.substr(4, 2), 16);
+
+	var end_red = parseInt(end_color.substr(0, 2), 16),
+	end_green = parseInt(end_color.substr(2, 2), 16),
+	end_blue = parseInt(end_color.substr(4, 2), 16);
+
+	// calculate new color
+	var diff_red = end_red - start_red;
+	var diff_green = end_green - start_green;
+	var diff_blue = end_blue - start_blue;
+
+	diff_red = ( (diff_red * percent) + start_red ).toString(16).split('.')[0];
+	diff_green = ( (diff_green * percent) + start_green ).toString(16).split('.')[0];
+	diff_blue = ( (diff_blue * percent) + start_blue ).toString(16).split('.')[0];
+
+	// ensure 2 digits by color
+	if( diff_red.length == 1 ) diff_red = '0' + diff_red
+	if( diff_green.length == 1 ) diff_green = '0' + diff_green
+	if( diff_blue.length == 1 ) diff_blue = '0' + diff_blue
+
+	return '#' + diff_red + diff_green + diff_blue;
+}
+
+function createOriginalPoints(n) {
+	var arr = [];
+	var xValue=0; var yValue=0; 
+	var angleValue=0; var colorValue=defaultColor;
+	for (var i=0;i<n;i++) {
+
+		angleValue = i*2*Math.PI/n;
+
+		xValue = Math.cos(angleValue);
+		yValue = Math.sin(angleValue);
+
+		colorValue = getGradientColor(startingGradientColor, stoppingGradientColor, angleValue/(2*Math.PI));
+
+     		arr[i] = {x:xValue, y:yValue, angle:angleValue, color:colorValue};
+  	}
+	return arr;
+}
+
+var step = 36;
+var originalBullets = createOriginalPoints(step);
+
 var bullets = [];
 for(var i=0;i<originalBullets.length;i++){
 	var originalBullet = originalBullets[i];
 	bullets.push({
 		x: originalBullet.x*10,
-		y: originalBullet.y*10
+		y: originalBullet.y*10,
+		angle:originalBullet.angle,
+		color:originalBullet.color
 	});
 }
 
-/*var tempCanvas = document.createElement("canvas");
-tempCanvas.width = canvas.width;
-tempCanvas.height = canvas.height;
-var tempContext = tempCanvas.getContext('2d');*/
+
+function calculate(x,y){
+	x = x || 0;
+	y = y || 0;
+	var x2 = (matrix[0][0])*x + (matrix[1][0])*y + vector[0];
+	var y2 = (matrix[0][1])*x + (matrix[1][1])*y + vector[1];
+	return {x:x2, y:y2};
+}
+
 
 function draw(){
 
@@ -322,6 +147,7 @@ function draw(){
 		var bullet = bullets[i];
 		var originalBullet = originalBullets[i];
 
+/*
 		// IS IT HOVERED?
 		var dx = (Mouse.x-canvas.width/2) - (originalBullet.x*100);
 		var dy = (Mouse.y-canvas.height/2) - (-originalBullet.y*100);
@@ -335,6 +161,7 @@ function draw(){
 			mtx_inputs[1].innerHTML = originalBullet.y.toFixed(1);
 			updateMatrixRight();
 		}
+*/
 
 		// Draw connecting line
 		ctx.beginPath();
@@ -362,15 +189,18 @@ function draw(){
 		// Draw where bullet is
 		ctx.beginPath();
 		ctx.arc(bullet.x*100, -bullet.y*100, 8, 0, 2*Math.PI, false);
-		ctx.fillStyle = bullet.isHovered ? '#dd3838' : '#000';
+				
+		ctx.fillStyle = bullet.isHovered ? bulletIsHoveredColor : bullet.color;
 		ctx.fill();
 
 	}
+/*
 	if(!anyHovered && mtx_inputs[0].innerHTML!="x"){
 		mtx_inputs[0].innerHTML = "x";
 		mtx_inputs[1].innerHTML = "y";
 		updateMatrixRight();
 	}
+*/
 	ctx.restore();
 
 
@@ -378,6 +208,19 @@ function draw(){
 	canvas.style.cursor = anyHovered ? "pointer": "default";
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
@@ -388,13 +231,10 @@ window.requestAnimFrame = (function(){
           };
 })();
 
-///////////////////////////////
-
-
-updateMatrixLeft();
-updateMatrixRight();
 
 (function animloop(){
 	draw();
 	requestAnimFrame(animloop);
 })();
+
+
