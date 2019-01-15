@@ -137,13 +137,14 @@ var createPellsLocus2 = (function () {
 
 var originalBullets = [];
 var bullets = [];
+var infinityScalesAs = 20;
 
-function initBullets(curveId) {
-	if (curveId==1) {
+function initBullets(locusId) {
+	if (locusId==1) {
 		createOriginalPoints = createUnitCircle;
 	}
-	if (curveId==2){
-		createOriginalPoints = createPellsLocus2;	
+	if (locusId==2){
+		createOriginalPoints = createPellsLocus2;
 	}
 
 	originalBullets = createOriginalPoints();
@@ -152,8 +153,8 @@ function initBullets(curveId) {
 	for(var i=0;i<originalBullets.length;i++){
 		var originalBullet = originalBullets[i];
 		bullets.push({
-			x: originalBullet.x*10,
-			y: originalBullet.y*10,
+			x: originalBullet.x*infinityScalesAs,
+			y: originalBullet.y*infinityScalesAs,
 			angle:originalBullet.angle,
 			color:originalBullet.color
 		});
@@ -161,7 +162,42 @@ function initBullets(curveId) {
 }
 initBullets(1);
 
-
+var animationPaused = false;
+function initMatrix(matrixId) {
+	animationPaused = true;
+	if (matrixId==1) {
+		//matrix[0][0]
+		mtx_matrix[0].value=1;
+		//matrix[1][0]
+		mtx_matrix[1].value=0;
+		//matrix[0][1]
+		mtx_matrix[2].value=0;
+		//matrix[1][1]
+		mtx_matrix[3].value=1;
+	}
+	if (matrixId==2){
+		//matrix[0][0]
+		mtx_matrix[0].value=3;
+		//matrix[1][0]
+		mtx_matrix[1].value=4;
+		//matrix[0][1]
+		mtx_matrix[2].value=2;
+		//matrix[1][1]
+		mtx_matrix[3].value=3;
+	}
+	if (matrixId==3){
+		//matrix[0][0]
+		mtx_matrix[0].value=2;
+		//matrix[1][0]
+		mtx_matrix[1].value=3;
+		//matrix[0][1]
+		mtx_matrix[2].value=1;
+		//matrix[1][1]
+		mtx_matrix[3].value=2;
+	}
+	updateMatrixLeft();	
+	animationPaused = false;
+}
 
 
 // Mouse
@@ -328,7 +364,7 @@ window.requestAnimFrame = (function(){
 updateMatrixLeft();
 
 (function animloop(){
-	draw();
+	if (!animationPaused) draw();
 	requestAnimFrame(animloop);
 })();
 
