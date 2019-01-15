@@ -1,4 +1,6 @@
-
+function $(selector){
+	return document.querySelectorAll(selector);
+}
 
 var canvas = document.querySelector("canvas#bullets");
 var ctx = canvas.getContext('2d');
@@ -91,6 +93,86 @@ for(var i=0;i<originalBullets.length;i++){
 	});
 }
 
+// Mouse
+var Mouse = {
+	x: 0,
+	y: 0
+};
+
+// Make inputs scrubbable
+var scrubInput = null;
+var scrubPosition = {x:0, y:0};
+var scrubStartValue = 0;
+function makeScrubbable(input){
+	input.onmousedown = function(e){
+		scrubInput = e.target;
+		scrubPosition.x = e.clientX;
+		scrubPosition.y = e.clientY;
+		scrubStartValue = parseFloat(input.value);
+	}
+	input.onclick = function(e){
+		e.target.select();
+	}
+}
+window.onmousemove = function(e){
+	// Mouse
+	Mouse.x = e.clientX;
+	Mouse.y = e.clientY;
+
+	// If browser allows it, try to find x/y relative to canvas rather than page
+	if(e.offsetX != undefined){
+		Mouse.x = e.offsetX;
+		Mouse.y = e.offsetY;
+	}
+	else if(e.layerX != undefined && e.originalTarget != undefined){
+		Mouse.x = e.layerX-e.originalTarget.offsetLeft;
+		Mouse.y = e.layerY-e.originalTarget.offsetTop;
+	}
+
+	// Scrubbing
+	if(!scrubInput) return;
+	scrubInput.blur();
+	var deltaX = e.clientX - scrubPosition.x;
+	deltaX = Math.round(deltaX/10)*0.1; // 0.1 for every 10px
+	var val = scrubStartValue + deltaX;
+	scrubInput.value = (Math.round(val*10)/10).toFixed(1);
+	updateMatrixLeft();
+
+}
+window.onmouseup = function(){
+	scrubInput = null;
+}
+
+var mtx_matrix = $("#mtx_matrix input");
+for(var i=0;i<mtx_matrix.length;i++){
+	var input = mtx_matrix[i];
+	input.onchange = updateMatrixLeft;
+	makeScrubbable(input);
+}
+var mtx_vector = $("#mtx_vector input");
+for(var i=0;i<mtx_vector.length;i++){
+	var input = mtx_vector[i];
+	input.onchange = updateMatrixLeft;
+	makeScrubbable(input);
+}
+
+function updateMatrixLeft(){
+
+	/*for(var i=0;i<6;i++){
+		var m = mtx_expanded_left[i];
+		var t = mtx_transforms[i];
+		m.innerHTML = t.value;
+	}*/
+
+	matrix[0][0] = parseFloat(mtx_matrix[0].value) || 0;
+	matrix[1][0] = parseFloat(mtx_matrix[1].value) || 0;
+	vector[0] = parseFloat(mtx_vector[0].value) || 0;
+	matrix[0][1] = parseFloat(mtx_matrix[2].value) || 0;
+	matrix[1][1] = parseFloat(mtx_matrix[3].value) || 0;
+	vector[1] = parseFloat(mtx_vector[1].value) || 0;
+
+	draw();
+}
 
 function calculate(x,y){
 	x = x || 0;
@@ -219,9 +301,6 @@ function draw(){
 
 
 
-
-
-
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
           window.webkitRequestAnimationFrame ||
@@ -230,6 +309,9 @@ window.requestAnimFrame = (function(){
             window.setTimeout(callback, 1000 / 60);
           };
 })();
+
+
+updateMatrixLeft();
 
 
 (function animloop(){
