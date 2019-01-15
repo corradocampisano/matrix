@@ -2,6 +2,17 @@ function $(selector){
 	return document.querySelectorAll(selector);
 }
 
+
+var scaleFactor = 1;
+function zoom(factor) {
+	if (factor<=0) {
+		scaleFactor = 1;
+	} else {
+		scaleFactor *= factor;
+	}
+	draw();
+}
+
 var canvas = document.querySelector("canvas#bullets");
 var ctx = canvas.getContext('2d');
 
@@ -58,37 +69,100 @@ function getGradientColor(start_color, end_color, percent) {
 	return '#' + diff_red + diff_green + diff_blue;
 }
 
-function createOriginalPoints(n) {
-	var arr = [];
-	var xValue=0; var yValue=0; 
-	var angleValue=0; var colorValue=defaultColor;
-	for (var i=0;i<n;i++) {
 
-		angleValue = i*2*Math.PI/n;
+var createOriginalPoints = (function () {
+	return function () {
+		return {x:0, y:0, angle:0, color:'#000000'};
+	}
+})();
 
-		xValue = Math.cos(angleValue);
-		yValue = Math.sin(angleValue);
 
-		colorValue = getGradientColor(startingGradientColor, stoppingGradientColor, angleValue/(2*Math.PI));
+var createUnitCircle = (function () {
+	return function () {
+		var arr = [];
+		var angleValue=0.0; 
+		var xValue=0.0; var yValue=0.0;
+		var gradientValue = 0.0; 
+		var colorValue=defaultColor;
 
-     		arr[i] = {x:xValue, y:yValue, angle:angleValue, color:colorValue};
-  	}
-	return arr;
-}
+		var pointsCount = 36;
 
-var step = 36;
-var originalBullets = createOriginalPoints(step);
+		for (var i=0;i<pointsCount;i++) {
 
+			angleValue = i*2*Math.PI/pointsCount;
+
+			xValue = Math.cos(angleValue);
+			yValue = Math.sin(angleValue);
+
+			gradientValue = angleValue / (2*Math.PI);
+			colorValue = getGradientColor(startingGradientColor, stoppingGradientColor, gradientValue);
+
+			arr[i] = {angle:angleValue, x:xValue, y:yValue, gradient:gradientValue, color:colorValue};
+	  	}
+		return arr;
+	}
+})();
+
+var createPellsLocus2 = (function () {
+	return function () {
+		var arr = [];
+		var angleValue=0.0; 
+		var xValue=0.0; var yValue=0.0;
+		var gradientValue = 0.0; 
+		var colorValue=defaultColor;
+
+		var pointsStart = -18;
+		var pointsStop = 18;
+
+		for (var i=pointsStart;i<pointsStop;i++) {
+
+			angleValue = (0.01 + i*2*Math.PI) / (pointsStop-pointsStart);
+
+			xValue = Math.cosh(angleValue);
+			yValue = Math.sinh(angleValue);
+
+			gradientValue = (Math.PI + angleValue) / (2*Math.PI);
+			colorValue = getGradientColor(startingGradientColor, stoppingGradientColor, gradientValue);
+
+	     		arr[i-pointsStart] = {angle:angleValue, x:xValue, y:yValue, gradient:gradientValue, color:colorValue};
+
+			var negX = -1*xValue;
+			arr[i-pointsStart+(pointsStop-pointsStart)] = {angle:angleValue, x:negX, y:yValue, gradient:gradientValue, color:colorValue};
+	  	}
+
+		return arr;
+	}
+})();
+
+
+var originalBullets = [];
 var bullets = [];
-for(var i=0;i<originalBullets.length;i++){
-	var originalBullet = originalBullets[i];
-	bullets.push({
-		x: originalBullet.x*10,
-		y: originalBullet.y*10,
-		angle:originalBullet.angle,
-		color:originalBullet.color
-	});
+
+function initBullets(curveId) {
+	if (curveId==1) {
+		createOriginalPoints = createUnitCircle;
+	}
+	if (curveId==2){
+		createOriginalPoints = createPellsLocus2;	
+	}
+
+	originalBullets = createOriginalPoints();
+	bullets = [];
+
+	for(var i=0;i<originalBullets.length;i++){
+		var originalBullet = originalBullets[i];
+		bullets.push({
+			x: originalBullet.x*10,
+			y: originalBullet.y*10,
+			angle:originalBullet.angle,
+			color:originalBullet.color
+		});
+	}
 }
+initBullets(1);
+
+
+
 
 // Mouse
 var Mouse = {
@@ -182,6 +256,10 @@ function drawBase(){
 	// center
 	ctx.translate(canvas.width/2,canvas.height/2);
 
+	// scale
+	if (scaleFactor>0 && scaleFactor!=1)
+		ctx.scale(scaleFactor, scaleFactor);
+
 	// draw axes
 	ctx.lineWidth = 1;
 	ctx.beginPath();
@@ -253,5 +331,4 @@ updateMatrixLeft();
 	draw();
 	requestAnimFrame(animloop);
 })();
-
 

@@ -21,6 +21,17 @@
 
 	<div id="math">
 
+		<div class="tools">
+			<button onclick="zoom(1.2)">zoom +</button>
+			<button onclick="zoom(0.8)">zoom -</button>
+			<button onclick="zoom(0)">(reset)</button>
+		</div>
+		<div class="tools">
+			<button onclick="initBullets(1)">circle 1</button>
+			<button onclick="initBullets(2)">Pells 2</button>
+			<button onclick="initBullets(0)">(redraw)</button>
+		</div>
+
 		<div class="signs">[</div>
 		<div id="mtx_input"  class="matrix unselectable" style="width:60px">
 			<div plain style="position: absolute; top: 0px;">x'</div>
@@ -32,11 +43,11 @@
 
 		<div class="signs">[</div>
 		<div id="mtx_matrix" class="matrix unselectable" style="width:120px">
-			<input value="-6.0"/>
+			<input value="2.0"/>
 			<input value="0.0"/>
 
 			<input value="0.0"/>
-			<input value="-2.0"/>
+			<input value="2.0"/>
 		</div>
 		<div class="signs">]</div>
 

@@ -34,7 +34,7 @@ a:hover{
 
 /*** MATHs ***/
 #math{
-	width: 1200px;
+	width: 1600px;
 	height: 220px;
 	margin: 0px auto;
 	font-family: monospace;
@@ -45,6 +45,17 @@ a:hover{
 	-ms-transform: scale(0.9);
 	transform: scale(0.9);
 
+}
+
+.tools{
+	position: relative;
+	top: 20px;
+	width:100px;
+	float: left;
+}
+.tools > button{
+	width:90px;
+	font-size: 12px;
 }
 
 .signs{
