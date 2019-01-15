@@ -10,8 +10,6 @@ canvas.style.width = window.innerWidth+"px";
 canvas.height = 600;
 canvas.style.height = 600+"px";
 
-
-
 var matrix = [[1, 0],[0, 1]];
 var vector = [0,0];
 
@@ -19,7 +17,6 @@ var defaultColor = '#000';
 var startingGradientColor = '#FF0000';
 var stoppingGradientColor = '#0000FF';
 var bulletIsHoveredColor = '#dd3838';
-
 
 function getGradientColor(start_color, end_color, percent) {
 	// strip the leading # if it's there
@@ -157,18 +154,12 @@ for(var i=0;i<mtx_vector.length;i++){
 }
 
 function updateMatrixLeft(){
-
-	/*for(var i=0;i<6;i++){
-		var m = mtx_expanded_left[i];
-		var t = mtx_transforms[i];
-		m.innerHTML = t.value;
-	}*/
-
 	matrix[0][0] = parseFloat(mtx_matrix[0].value) || 0;
 	matrix[1][0] = parseFloat(mtx_matrix[1].value) || 0;
-	vector[0] = parseFloat(mtx_vector[0].value) || 0;
 	matrix[0][1] = parseFloat(mtx_matrix[2].value) || 0;
 	matrix[1][1] = parseFloat(mtx_matrix[3].value) || 0;
+
+	vector[0] = parseFloat(mtx_vector[0].value) || 0;
 	vector[1] = parseFloat(mtx_vector[1].value) || 0;
 
 	draw();
@@ -182,28 +173,16 @@ function calculate(x,y){
 	return {x:x2, y:y2};
 }
 
-
-function draw(){
-
-	// TEMP CANVAS saved
-	//tempContext.clearRect(0,0,canvas.width,canvas.height);	
-	//tempContext.drawImage(canvas,0,0);
-
-	// Clear canvas
+function drawBase(){
+	// clear canvas
 	canvas.width = window.innerWidth;
 	canvas.style.width = window.innerWidth+"px";
-	//ctx.clearRect(0,0,canvas.width,canvas.height);
 	ctx.save();
 
-	// Draw trail
-	/*ctx.globalAlpha = 0.7;
-	ctx.drawImage(tempCanvas,0,0);
-	ctx.globalAlpha = 1.0;*/
-
-	// Center
+	// center
 	ctx.translate(canvas.width/2,canvas.height/2);
 
-	// Draw axes
+	// draw axes
 	ctx.lineWidth = 1;
 	ctx.beginPath();
 	ctx.strokeStyle = '#bbb';
@@ -212,6 +191,10 @@ function draw(){
 	ctx.moveTo(0,-canvas.height/2);
 	ctx.lineTo(0,canvas.height/2);
 	ctx.stroke();
+}
+
+function draw(){
+	drawBase();
 
 	// Calculate bullets
 	for(var i=0;i<bullets.length;i++){
@@ -229,77 +212,31 @@ function draw(){
 		var bullet = bullets[i];
 		var originalBullet = originalBullets[i];
 
-/*
-		// IS IT HOVERED?
-		var dx = (Mouse.x-canvas.width/2) - (originalBullet.x*100);
-		var dy = (Mouse.y-canvas.height/2) - (-originalBullet.y*100);
-		var isHovered = (dx*dx+dy*dy<25);
-		dx = (Mouse.x-canvas.width/2) - (bullet.x*100);
-		dy = (Mouse.y-canvas.height/2) - (-bullet.y*100);
-		bullet.isHovered = isHovered || (dx*dx+dy*dy<100); // radius:10px
-		if(bullet.isHovered){
-			anyHovered = true;
-			mtx_inputs[0].innerHTML = originalBullet.x.toFixed(1);
-			mtx_inputs[1].innerHTML = originalBullet.y.toFixed(1);
-			updateMatrixRight();
-		}
-*/
-
-		// Draw connecting line
-		ctx.beginPath();
+		ctx.fillStyle = bullet.color;
+		ctx.strokeStyle = bullet.color;
 		ctx.lineWidth = 1;
-		ctx.strokeStyle = bullet.isHovered ? "#EE3838" : '#888';
+		
+		// draw connecting line
+		ctx.beginPath();
 		ctx.moveTo(originalBullet.x*100, -originalBullet.y*100);
 		ctx.lineTo(bullet.x*100, -bullet.y*100);
 		ctx.stroke();
 
-		// Draw where original was
+		// draw where original was
 		ctx.beginPath();
 		ctx.arc(originalBullet.x*100, -originalBullet.y*100, 4, 0, 2*Math.PI, false);
-		ctx.fillStyle = '#ddd';
 		ctx.fill();
-		ctx.stroke();
 
-	}
-
-	// Draw bullets
-	for(var i=0;i<bullets.length;i++){
-
-		var bullet = bullets[i];
-		var originalBullet = originalBullets[i];
-
-		// Draw where bullet is
+		// draw where bullet is
 		ctx.beginPath();
 		ctx.arc(bullet.x*100, -bullet.y*100, 8, 0, 2*Math.PI, false);
-				
-		ctx.fillStyle = bullet.isHovered ? bulletIsHoveredColor : bullet.color;
 		ctx.fill();
-
 	}
-/*
-	if(!anyHovered && mtx_inputs[0].innerHTML!="x"){
-		mtx_inputs[0].innerHTML = "x";
-		mtx_inputs[1].innerHTML = "y";
-		updateMatrixRight();
-	}
-*/
 	ctx.restore();
-
 
 	// CURSOR
 	canvas.style.cursor = anyHovered ? "pointer": "default";
-
 }
-
-
-
-
-
-
-
-
-
-
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
@@ -310,9 +247,7 @@ window.requestAnimFrame = (function(){
           };
 })();
 
-
 updateMatrixLeft();
-
 
 (function animloop(){
 	draw();
